@@ -1,12 +1,12 @@
 package com.lendico.challenge.annuityplangenerator.service;
 
+import com.lendico.challenge.annuityplangenerator.errorhandling.InputValidationException;
+import com.lendico.challenge.annuityplangenerator.errorhandling.UnexpectedException;
 import com.lendico.challenge.annuityplangenerator.model.LoanRepayment;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -14,7 +14,10 @@ import java.util.List;
 
 @Slf4j
 public class AnnuityPlanComputationService {
-    public  AnnuityPlanComputationService(BigDecimal loan_Amount, BigDecimal nominal_Rate, int duration, String start_date) {
+    public  AnnuityPlanComputationService(BigDecimal loan_Amount,
+                                          BigDecimal nominal_Rate,
+                                          int duration,
+                                          String start_date) {
         this.loan_Amount = loan_Amount;
         this.nominal_Rate = nominal_Rate;
         this.duration = duration;
@@ -31,11 +34,9 @@ public class AnnuityPlanComputationService {
     private final BigDecimal DAYS_IN_MONTH = new BigDecimal(30);
     private final BigDecimal DAYS_IN_YEAR = new BigDecimal(360);
     private final DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssz");
+    private final BigDecimal PERCENTAGE = new BigDecimal("0.01");
     private BigDecimal annuity;
     private DateTime startDate;
-
-
-    private final BigDecimal PERCENTAGE = new BigDecimal("0.01");
 
     public List<LoanRepayment> computePlan(){
         validate();
@@ -67,7 +68,7 @@ public class AnnuityPlanComputationService {
                 loanRepayment.setBorrowerPaymentAmount(annuity);
                 loanRepayment.setDate(startDate.plusMonths(installment).toString(fmt));
 
-                // Exception or final settlement for last month
+                // Final settlement for last month
                 if (installment+1 == duration){
                     loanRepayment.setRemainingOutstandingPrincipal(new BigDecimal(0));
                     loanRepayment.setPrincipal(monthlyIniOutstandingPrincipal);
@@ -80,20 +81,38 @@ public class AnnuityPlanComputationService {
             }
         }catch (Exception e){
             log.error("Un-expected error while computing the loan repayments ", e);
-            // throw run time custom error
+            throw new UnexpectedException("");
         }
         return loanRepayments;
     }
 
-    private void validate() {
+    public void validate() {
+        List<String> errors = new ArrayList<>();
         try {
-            this.startDate = new DateTime(start_Date_Str);
-        } catch (IllegalArgumentException e) {
-            log.error("Wrong date format for startDate ", e);
-            //@TODO throw custom error
-        }
-    }
+            if (loan_Amount.longValue() <= 0)
+                errors.add("loanAmount : must be greater than or equal to 1");
 
+            if (nominal_Rate.longValue() <= 0)
+                errors.add("nominalRate : must be greater than or equal to 1");
+
+            if (duration <= 0)
+                errors.add("duration : must be greater than or equal to 1");
+
+            if (start_Date_Str == null || start_Date_Str.isEmpty())
+                errors.add("startDate : must be non empty");
+            else
+                this.startDate = new DateTime(start_Date_Str);
+
+        }catch (IllegalArgumentException iex){
+            log.error("Wrong date format for startDate ", iex);
+            errors.add("startDate : Wrong date format");
+        }catch (Exception ex){
+            log.error("Un-expected exception ",ex );
+            throw new UnexpectedException("");
+        }
+        if (errors.size()>0)
+            throw new InputValidationException(errors);
+    }
 
     /**
      * This method is used to compute annuity with below formula :
@@ -102,7 +121,7 @@ public class AnnuityPlanComputationService {
      * Let do it like : A / (B - C)
      * @return calculated annuity
      */
-    private void computeAnnuity() {
+    public void computeAnnuity() {
         try {
             BigDecimal monthlyRate = nominal_Rate.divide( MONTHS_IN_YEAR, PRECISION_LENGTH,  RoundingMode.CEILING).multiply(PERCENTAGE);
             log.debug("Calculated Monthly Rate = {} ", monthlyRate);
@@ -112,7 +131,11 @@ public class AnnuityPlanComputationService {
             log.info("Computed Annuity = {} ", annuity);
         } catch (Exception e) {
             log.error("Un-expected error while computing Annuity ", e);
-            throw new RuntimeException("Throw 500 error with custom Calc error");
+            throw new UnexpectedException("");
         }
+    }
+
+    public BigDecimal getAnnuity(){
+        return annuity;
     }
 }
