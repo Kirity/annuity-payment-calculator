@@ -1,4 +1,4 @@
-#Plan Generator
+# Plan Generator
 A microservice for computing loan repayment schedule.
 # Description:
 This service is developed to compute the monthly repayments throughout the lifetime of the loan.
@@ -39,6 +39,7 @@ It takes the below four _mandatory_ input parameters:
 You can use tools like Postman or curl commands to call the endpoint.
 
 Example request values:
+
 Headers:
 
        Content-Type:application/json
