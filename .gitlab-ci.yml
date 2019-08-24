@@ -32,8 +32,8 @@ docker-build:
 docker-build-master:
   stage: push
   script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-    - docker build --pull -t "$CI_REGISTRY_IMAGE" .
-    - docker push "$CI_REGISTRY_IMAGE"
+    - docker login -u "kirity" -p "dockerhubPass1" docker.io
+    - docker build --pull -t loan-app-image:latest .
+    - docker push loan-app-image:latest
   only:
     - master
