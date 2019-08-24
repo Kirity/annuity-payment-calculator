@@ -18,8 +18,6 @@ maven-build:
   image: maven:3-jdk-8
   stage: build
   script:
-    - "echo pwd"
-    - "echo ls"
     - "mvn package -B"
   artifacts:
     paths:
