@@ -6,6 +6,7 @@ services:
 variables:
   DOCKER_DRIVER: overlay
   SPRING_PROFILES_ACTIVE: gitlab-ci
+  DOCKER_REPO : sb-works
 
 stages:
   - build
@@ -32,9 +33,9 @@ docker-build:
 docker-build-master:
   stage: push
   script:
-    - docker login -u "kirity" -p "dockerhubPass1" docker.io
-    - docker build --pull -t loan-app-image:v1 .
-    - docker tag loan-app-image:v1 kirity/sb-works:v1
-    - docker push kirity/sb-works:v1
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker build --pull -t "$CI_REGISTRY_IMAGE":master .
+    - docker tag "$CI_REGISTRY_IMAGE":master $CI_REGISTRY_USER/DOCKER_REPO:master
+    - docker push $CI_REGISTRY_USER/DOCKER_REPO:master
   only:
     - master
