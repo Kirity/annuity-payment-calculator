@@ -1,4 +1,5 @@
 image: docker:latest
+
 services:
   - docker:dind
 
@@ -6,13 +7,25 @@ variables:
   DOCKER_DRIVER: overlay
   SPRING_PROFILES_ACTIVE: gitlab-ci
 
+stages:
+  - build
+  - push
+
 before_script:
   - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
-stages:
-  - push
+maven-build:
+  image: maven:3-jdk-8
+  stage: build
+  script:
+    - "echo pwd"
+    - "echo ls"
+    - "mvn package -B"
+  artifacts:
+    paths:
+      - target/*.jar
 
-build:
+docker-build:
   stage: push
   script:
     - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" .
@@ -20,7 +33,7 @@ build:
   except:
     - master
 
-build-master:
+docker-build-master:
   stage: push
   script:
     - docker build --pull -t "$CI_REGISTRY_IMAGE" .
