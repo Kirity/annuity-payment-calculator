@@ -27,6 +27,20 @@ In local env use the below command:
 
 When the service is started hit the url  _http://localhost:9999/_ you should see a welcome message.
 
+# Docke commands
+    *   To see all images : docker images
+    *   To see all the running containers : docker ps -a
+    
+    *   To build image : docker build -d --tag laon-app:latest --rm=true .
+    *   To remove image : docker container rm 
+    *   To run the image : docker run -p 8080:8080 loan-app:latest
+    *   To stop the container : docker stop <container-name> or docker stop <container-id>
+    *   To restart the container : docker restart <container-name> or docker restart <container-id>
+    
+    *   To login to docker : docker login
+    *   To tag the image with repo : docker tag laon-app:latest <docker-username>/<your-repo>[:tag]
+    *   To push the image to docker hub : docke push <docker-username>/<your-repo>[:tag]
+
 # How to test?
 This service exposes an POST end-point _http://localhost:9999/generate-plan_
 It takes the below four _mandatory_ input parameters:
