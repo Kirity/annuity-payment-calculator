@@ -33,7 +33,8 @@ docker-build-master:
   stage: push
   script:
     - docker login -u "kirity" -p "dockerhubPass1" docker.io
-    - docker build --pull -t sb-works:from-gitlab .
-    - docker push kirity/sb-works:from-gitlab
+    - docker build --pull -t loan-app-image:v1 .
+    - docker tag loan-app-image:v1 kirity/sb-works:v1
+    - docker push kirity/sb-works:v1
   only:
     - master
