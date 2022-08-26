@@ -6,7 +6,6 @@ services:
 variables:
   DOCKER_DRIVER: overlay
   SPRING_PROFILES_ACTIVE: gitlab-ci
-  DOCKER_REPO : sb-works
 
 stages:
   - build
@@ -24,9 +23,10 @@ maven-build:
 docker-build:
   stage: push
   script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-    - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG" .
-    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build --pull -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG .
+    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG $CI_REGISTRY_USER/$DOCKER_REPO:$CI_COMMIT_REF_SLUG
+    - docker push $CI_REGISTRY_USER/$DOCKER_REPO:$CI_COMMIT_REF_SLUG
   except:
     - master
 
